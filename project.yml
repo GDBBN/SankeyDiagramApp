@@ -1,0 +1,24 @@
+name: SankeyStudio
+options:
+  bundleIdPrefix: de.sankeystudio
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+targets:
+  SankeyStudio:
+    type: application
+    platform: iOS
+    sources:
+      - path: SankeyStudio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.sankeystudio.app
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Sankey Studio
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+

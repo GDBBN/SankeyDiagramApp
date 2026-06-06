@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flowly – Finanzfluss visualisieren</title>
+    <style>
+      :root {
+        --ink: #14213d;
+        --muted: #68738a;
+        --line: #e3e8f0;
+        --panel: #fff;
+        --blue: #3568dd;
+        --blue-soft: #eef4ff;
+        --green: #30a46c;
+        --bg: #f5f7fb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      header {
+        height: 70px;
+        padding: 0 30px;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        display: flex;
+        gap: 11px;
+        align-items: center;
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: -0.5px;
+      }
+      .logo {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: var(--ink);
+        color: white;
+      }
+      .header-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .button {
+        border: 0;
+        border-radius: 9px;
+        padding: 10px 14px;
+        color: white;
+        background: var(--blue);
+        font-weight: 700;
+      }
+      .button.secondary {
+        background: #fff;
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+      .button.small {
+        padding: 7px 10px;
+        font-size: 13px;
+      }
+      .app {
+        max-width: 1540px;
+        margin: auto;
+        padding: 26px;
+      }
+      .intro {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        margin-bottom: 20px;
+      }
+      h1 {
+        font-size: clamp(24px, 3vw, 34px);
+        letter-spacing: -1.2px;
+        margin: 0 0 5px;
+      }
+      .intro p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(340px, 440px) minmax(600px, 1fr);
+        gap: 20px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 5px 20px #16213d0a;
+      }
+      .editor {
+        padding: 18px;
+        max-height: calc(100vh - 145px);
+        overflow: auto;
+      }
+      .section {
+        margin-bottom: 25px;
+      }
+      .section:last-child {
+        margin-bottom: 0;
+      }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 11px;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 0;
+      }
+      .sum {
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .entry,
+      .category {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-bottom: 8px;
+        background: #fff;
+      }
+      .entry {
+        display: grid;
+        grid-template-columns: 9px 1fr 100px 26px;
+        gap: 8px;
+        align-items: center;
+        padding: 8px;
+      }
+      .category {
+        padding: 8px;
+      }
+      .category > .entry {
+        grid-template-columns: 30px 1fr 100px 26px;
+        padding: 0;
+        border: 0;
+        margin: 0;
+      }
+      .child-list {
+        margin: 8px 0 0 17px;
+        padding-left: 12px;
+        border-left: 2px solid var(--line);
+      }
+      .child-list .entry {
+        grid-template-columns: 1fr 92px 26px;
+        background: #f8fafc;
+        border: 0;
+      }
+      .dot {
+        width: 9px;
+        height: 36px;
+        border-radius: 5px;
+      }
+      .color-picker {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        overflow: hidden;
+        background: transparent;
+      }
+      .color-picker::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      .color-picker::-webkit-color-swatch {
+        border: 0;
+        border-radius: 50%;
+      }
+      input {
+        width: 100%;
+        min-width: 0;
+        padding: 8px;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        color: var(--ink);
+        background: transparent;
+      }
+      input:hover,
+      input:focus {
+        border-color: var(--line);
+        outline: 0;
+        background: white;
+      }
+      .money {
+        text-align: right;
+        font-weight: 700;
+      }
+      .icon-button {
+        border: 0;
+        background: transparent;
+        color: #9aa3b2;
+        font-size: 18px;
+        padding: 2px;
+      }
+      .icon-button:hover {
+        color: #d33;
+      }
+      .add {
+        width: 100%;
+        border: 1px dashed #bdc8d9;
+        background: #fafcff;
+        color: var(--blue);
+        border-radius: 9px;
+        padding: 9px;
+        font-weight: 700;
+      }
+      .add.child {
+        margin: 7px 0 0 17px;
+        width: calc(100% - 17px);
+        padding: 6px;
+        font-size: 13px;
+      }
+      .visual {
+        overflow: hidden;
+        position: sticky;
+        top: 20px;
+      }
+      .visual-head {
+        padding: 17px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .visual-head p {
+        margin: 3px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .balance {
+        border-radius: 20px;
+        padding: 7px 11px;
+        background: #eaf8f0;
+        color: #18794e;
+        font-size: 13px;
+        font-weight: 800;
+      }
+      #chart {
+        display: block;
+        width: 100%;
+        height: min(670px, calc(100vh - 235px));
+        min-height: 500px;
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        border-top: 1px solid var(--line);
+      }
+      .metric {
+        padding: 14px 18px;
+        border-right: 1px solid var(--line);
+      }
+      .metric:last-child {
+        border: 0;
+      }
+      .metric span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 2px;
+      }
+      .metric strong {
+        font-size: 17px;
+      }
+      .node-name {
+        fill: var(--ink);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .node-value {
+        fill: var(--muted);
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .empty {
+        padding: 10px;
+        background: #fff8e8;
+        color: #8a6116;
+        border-radius: 9px;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+      #projectFile {
+        display: none;
+      }
+      .mobile-tabs,
+      .mobile-title,
+      .toolbar-menu {
+        display: none;
+      }
+      .toolbar {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        position: relative;
+      }
+      .toolbar-button {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        border: 0;
+        border-radius: 9px;
+        background: transparent;
+        color: var(--blue);
+        font-size: 19px;
+        font-weight: 700;
+      }
+      .toolbar-button:hover {
+        background: var(--blue-soft);
+      }
+      .toolbar-menu {
+        position: absolute;
+        z-index: 20;
+        right: 0;
+        top: 45px;
+        width: 205px;
+        padding: 6px;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        box-shadow: 0 12px 35px #14213d2a;
+      }
+      .toolbar-menu.open {
+        display: block;
+      }
+      .toolbar-menu button {
+        display: block;
+        width: 100%;
+        padding: 11px;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        border-radius: 8px;
+        color: var(--ink);
+      }
+      .toolbar-menu button:hover {
+        background: var(--blue-soft);
+      }
+      .title-input {
+        font-size: 15px;
+        border-color: var(--line);
+        background: #fff;
+      }
+      .chart-scroll {
+        overflow-x: auto;
+      }
+      @media (max-width: 1050px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .editor {
+          max-height: none;
+        }
+        .visual {
+          position: static;
+        }
+        #chart {
+          height: 600px;
+        }
+        .intro {
+          align-items: start;
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+      @media (max-width: 700px) {
+        body {
+          background: #f2f2f7;
+          padding-bottom: calc(64px + env(safe-area-inset-bottom));
+        }
+        header {
+          height: 52px;
+          padding: env(safe-area-inset-top) 10px 0 16px;
+          position: sticky;
+          top: 0;
+          z-index: 10;
+        }
+        .brand {
+          display: none;
+        }
+        .mobile-title {
+          display: block;
+          font-size: 18px;
+          font-weight: 750;
+        }
+        .toolbar {
+          margin-left: auto;
+          gap: 0;
+        }
+        .toolbar-button {
+          width: 36px;
+          height: 36px;
+        }
+        .app {
+          padding: 0;
+        }
+        .intro {
+          display: none;
+        }
+        .layout {
+          display: block;
+        }
+        .panel {
+          border: 0;
+          border-radius: 0;
+          box-shadow: none;
+        }
+        .screen {
+          display: none;
+        }
+        .screen.active {
+          display: block;
+        }
+        .editor {
+          padding: 18px 14px 30px;
+          max-height: none;
+          background: #f2f2f7;
+        }
+        .section {
+          padding: 12px;
+          margin-bottom: 18px;
+          background: white;
+          border-radius: 12px;
+        }
+        .entry,
+        .category {
+          border-radius: 9px;
+        }
+        .entry {
+          grid-template-columns: 7px 1fr 82px 22px;
+          gap: 5px;
+          padding: 7px 4px;
+        }
+        .category > .entry {
+          grid-template-columns: 28px 1fr 82px 22px;
+        }
+        .child-list .entry {
+          grid-template-columns: 1fr 78px 22px;
+        }
+        .add {
+          background: white;
+          border: 0;
+          text-align: left;
+          padding-left: 4px;
+        }
+        .visual {
+          position: static;
+          background: #f2f2f7;
+          padding: 12px;
+        }
+        .visual-head {
+          border: 0;
+          border-radius: 13px 13px 0 0;
+          background: white;
+          padding: 15px;
+        }
+        .visual-head h2 {
+          font-size: 20px;
+        }
+        .visual-head p {
+          max-width: 210px;
+        }
+        .chart-scroll {
+          background: white;
+        }
+        #chart {
+          width: 720px;
+          height: 520px;
+          min-height: 520px;
+        }
+        .summary {
+          grid-template-columns: repeat(3, 1fr);
+          background: white;
+          border-radius: 0 0 13px 13px;
+        }
+        .metric {
+          padding: 11px 9px;
+        }
+        .metric strong {
+          font-size: 13px;
+        }
+        .mobile-tabs {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          position: fixed;
+          z-index: 30;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: calc(58px + env(safe-area-inset-bottom));
+          padding-bottom: env(safe-area-inset-bottom);
+          background: #ffffffed;
+          backdrop-filter: blur(18px);
+          border-top: 1px solid #d8d8dc;
+        }
+        .mobile-tabs button {
+          border: 0;
+          background: transparent;
+          color: #777;
+          font-size: 11px;
+          font-weight: 600;
+        }
+        .mobile-tabs button span {
+          display: block;
+          font-size: 20px;
+          line-height: 24px;
+        }
+        .mobile-tabs button.active {
+          color: var(--blue);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand"><span class="logo">F</span> Sankey Studio</div>
+      <div class="mobile-title" id="mobileTitle">Finanzfluss</div>
+      <div class="toolbar">
+        <button class="toolbar-button" title="Neu" onclick="newProject()">
+          ＋
+        </button>
+        <button
+          class="toolbar-button"
+          title="Projekt laden"
+          onclick="document.querySelector('#projectFile').click()"
+        >
+          ⌑
+        </button>
+        <button
+          class="toolbar-button"
+          title="Exportieren"
+          onclick="toggleExportMenu()"
+        >
+          ↥
+        </button>
+        <div class="toolbar-menu" id="exportMenu">
+          <button
+            onclick="
+              downloadProject();
+              toggleExportMenu();
+            "
+          >
+            Projekt speichern
+          </button>
+          <button
+            onclick="
+              downloadPNG();
+              toggleExportMenu();
+            "
+          >
+            PNG speichern
+          </button>
+          <button
+            onclick="
+              sharePNG();
+              toggleExportMenu();
+            "
+          >
+            PNG teilen
+          </button>
+        </div>
+        <input
+          id="projectFile"
+          type="file"
+          accept=".json,application/json"
+          onchange="
+            loadProject(this.files[0]);
+            this.value = '';
+          "
+        />
+      </div>
+    </header>
+
+    <div class="app">
+      <div class="layout">
+        <aside class="panel editor screen active" id="editorScreen">
+          <div class="section">
+            <div class="section-head"><h2>Diagramm</h2></div>
+            <input
+              class="title-input"
+              id="projectTitle"
+              value="Monatlicher Finanzfluss"
+              oninput="updateTitle(this.value)"
+            />
+          </div>
+          <div id="warning"></div>
+          <div class="section">
+            <div class="section-head">
+              <h2>Einnahmen</h2>
+              <span class="sum" id="incomeSum"></span>
+            </div>
+            <div id="incomeList"></div>
+            <button class="add" onclick="addIncome()">
+              + Einnahme hinzufügen
+            </button>
+          </div>
+          <div class="section">
+            <div class="section-head">
+              <h2>Ausgaben</h2>
+              <span class="sum" id="expenseSum"></span>
+            </div>
+            <div id="expenseList"></div>
+            <button class="add" onclick="addExpense()">
+              + Ausgabengruppe hinzufügen
+            </button>
+          </div>
+        </aside>
+
+        <section class="panel visual screen" id="previewScreen">
+          <div class="visual-head">
+            <div>
+              <h2 id="diagramTitle">Monatlicher Finanzfluss</h2>
+              <p>Die Breite der Ströme entspricht dem jeweiligen Betrag.</p>
+            </div>
+            <span class="balance" id="balancePill"></span>
+          </div>
+          <div class="chart-scroll">
+            <svg id="chart" xmlns="http://www.w3.org/2000/svg"></svg>
+          </div>
+          <div class="summary">
+            <div class="metric">
+              <span>Einnahmen</span><strong id="metricIncome"></strong>
+            </div>
+            <div class="metric">
+              <span>Ausgaben</span><strong id="metricExpense"></strong>
+            </div>
+            <div class="metric">
+              <span>Übrig</span><strong id="metricBalance"></strong>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <nav class="mobile-tabs">
+      <button id="editorTab" class="active" onclick="setTab('editor')">
+        <span>☷</span>Bearbeiten
+      </button>
+      <button id="previewTab" onclick="setTab('preview')">
+        <span>▥</span>Vorschau
+      </button>
+    </nav>
+
+    <script>
+      const colors = [
+        "#3568dd",
+        "#8b5cf6",
+        "#ec4899",
+        "#f59e0b",
+        "#10b981",
+        "#06b6d4",
+        "#ef4444",
+        "#64748b",
+      ];
+      let state = {};
+      const euro = (value) =>
+        new Intl.NumberFormat("de-DE", {
+          style: "currency",
+          currency: "EUR",
+          maximumFractionDigits: 0,
+        }).format(value || 0);
+      const uid = () => Math.floor(Date.now() + Math.random() * 100000);
+      const clean = (text) =>
+        String(text).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      const totalIncome = () =>
+        state.incomes.reduce(
+          (sum, item) => sum + Math.max(0, +item.value || 0),
+          0,
+        );
+      const expenseValue = (item) =>
+        item.children.length
+          ? item.children.reduce(
+              (sum, child) => sum + Math.max(0, +child.value || 0),
+              0,
+            )
+          : Math.max(0, +item.value || 0);
+      const totalExpense = () =>
+        state.expenses.reduce((sum, item) => sum + expenseValue(item), 0);
+
+      function resetData() {
+        state = {
+          title: "Monatlicher Finanzfluss",
+          incomes: [
+            { id: uid(), name: "Gehalt", value: 3200 },
+            { id: uid(), name: "Nebenjob", value: 400 },
+          ],
+          expenses: [
+            {
+              id: uid(),
+              name: "Wohnen",
+              color: colors[0],
+              value: 0,
+              children: [
+                { id: uid(), name: "Miete", value: 1050 },
+                { id: uid(), name: "Strom & Internet", value: 120 },
+              ],
+            },
+            {
+              id: uid(),
+              name: "Alltag",
+              color: colors[1],
+              value: 0,
+              children: [
+                { id: uid(), name: "Lebensmittel", value: 430 },
+                { id: uid(), name: "Freizeit", value: 260 },
+              ],
+            },
+            {
+              id: uid(),
+              name: "Mobilität",
+              color: colors[3],
+              value: 310,
+              children: [],
+            },
+            {
+              id: uid(),
+              name: "Sparen & Investieren",
+              color: colors[4],
+              value: 900,
+              children: [],
+            },
+          ],
+        };
+        render();
+      }
+      function newProject() {
+        if (
+          confirm(
+            "Neues Diagramm erstellen? Nicht gespeicherte Änderungen gehen verloren.",
+          )
+        ) {
+          state = { title: "Mein Finanzfluss", incomes: [], expenses: [] };
+          render();
+        }
+      }
+      function updateTitle(value) {
+        state.title = value;
+        document.querySelector("#diagramTitle").textContent =
+          value || "Mein Finanzfluss";
+      }
+      function setTab(tab) {
+        const preview = tab === "preview";
+        document
+          .querySelector("#editorScreen")
+          .classList.toggle("active", !preview);
+        document
+          .querySelector("#previewScreen")
+          .classList.toggle("active", preview);
+        document
+          .querySelector("#editorTab")
+          .classList.toggle("active", !preview);
+        document
+          .querySelector("#previewTab")
+          .classList.toggle("active", preview);
+        document.querySelector("#mobileTitle").textContent = preview
+          ? "Vorschau"
+          : "Finanzfluss";
+        if (preview) setTimeout(draw, 0);
+      }
+      function toggleExportMenu() {
+        document.querySelector("#exportMenu").classList.toggle("open");
+      }
+      function addIncome() {
+        state.incomes.push({ id: uid(), name: "Neue Einnahme", value: 0 });
+        render();
+      }
+      function addExpense() {
+        state.expenses.push({
+          id: uid(),
+          name: "Neue Ausgabengruppe",
+          color: colors[state.expenses.length % colors.length],
+          value: 0,
+          children: [],
+        });
+        render();
+      }
+      function addChild(parentId) {
+        state.expenses
+          .find((x) => x.id === parentId)
+          .children.push({ id: uid(), name: "Neue Unterkategorie", value: 0 });
+        render();
+      }
+      function removeIncome(id) {
+        state.incomes = state.incomes.filter((x) => x.id !== id);
+        render();
+      }
+      function removeExpense(id) {
+        state.expenses = state.expenses.filter((x) => x.id !== id);
+        render();
+      }
+      function removeChild(parentId, id) {
+        const parent = state.expenses.find((x) => x.id === parentId);
+        parent.children = parent.children.filter((x) => x.id !== id);
+        render();
+      }
+      function updateIncome(id, key, value) {
+        state.incomes.find((x) => x.id === id)[key] =
+          key === "value" ? +value : value;
+        render(false);
+      }
+      function updateExpense(id, key, value) {
+        state.expenses.find((x) => x.id === id)[key] =
+          key === "value" ? +value : value;
+        render(false);
+      }
+      function updateChild(parentId, id, key, value) {
+        state.expenses
+          .find((x) => x.id === parentId)
+          .children.find((x) => x.id === id)[key] =
+          key === "value" ? +value : value;
+        render(false);
+      }
+
+      function render(rebuild = true) {
+        if (rebuild) {
+          document.querySelector("#projectTitle").value =
+            state.title || "Mein Finanzfluss";
+          document.querySelector("#incomeList").innerHTML = state.incomes
+            .map(
+              (x) => `
+          <div class="entry"><span class="dot" style="background:#14213d"></span>
+            <input value="${clean(x.name)}" oninput="updateIncome(${x.id},'name',this.value)">
+            <input class="money" type="number" min="0" value="${x.value}" oninput="updateIncome(${x.id},'value',this.value)">
+            <button class="icon-button" onclick="removeIncome(${x.id})">×</button>
+          </div>`,
+            )
+            .join("");
+          document.querySelector("#expenseList").innerHTML = state.expenses
+            .map(
+              (x) => `
+          <div class="category"><div class="entry"><input class="color-picker" type="color" value="${x.color}" oninput="updateExpense(${x.id},'color',this.value)">
+            <input value="${clean(x.name)}" oninput="updateExpense(${x.id},'name',this.value)">
+            <input class="money" type="number" min="0" value="${x.children.length ? expenseValue(x) : x.value}" ${x.children.length ? "disabled" : ""} oninput="updateExpense(${x.id},'value',this.value)">
+            <button class="icon-button" onclick="removeExpense(${x.id})">×</button>
+          </div>
+          <div class="child-list">${x.children
+            .map(
+              (c) => `<div class="entry">
+            <input value="${clean(c.name)}" oninput="updateChild(${x.id},${c.id},'name',this.value)">
+            <input class="money" type="number" min="0" value="${c.value}" oninput="updateChild(${x.id},${c.id},'value',this.value)">
+            <button class="icon-button" onclick="removeChild(${x.id},${c.id})">×</button></div>`,
+            )
+            .join("")}</div>
+          <button class="add child" onclick="addChild(${x.id})">+ Unterkategorie</button></div>`,
+            )
+            .join("");
+        }
+        const income = totalIncome(),
+          expense = totalExpense(),
+          balance = income - expense;
+        document.querySelector("#diagramTitle").textContent =
+          state.title || "Mein Finanzfluss";
+        document.querySelector("#incomeSum").textContent = euro(income);
+        document.querySelector("#expenseSum").textContent = euro(expense);
+        document.querySelector("#metricIncome").textContent = euro(income);
+        document.querySelector("#metricExpense").textContent = euro(expense);
+        document.querySelector("#metricBalance").textContent = euro(balance);
+        document.querySelector("#metricBalance").style.color =
+          balance < 0 ? "#d33" : "#18794e";
+        const pill = document.querySelector("#balancePill");
+        pill.textContent =
+          balance >= 0 ? `${euro(balance)} übrig` : `${euro(-balance)} fehlen`;
+        pill.style.cssText =
+          balance >= 0 ? "" : "background:#fff0f0;color:#c33";
+        document.querySelector("#warning").innerHTML =
+          expense > income
+            ? `<div class="empty">Deine Ausgaben sind ${euro(expense - income)} höher als deine Einnahmen.</div>`
+            : "";
+        draw();
+      }
+
+      function draw() {
+        const svg = document.querySelector("#chart"),
+          w = svg.clientWidth || 850,
+          h = svg.clientHeight || 600,
+          income = totalIncome(),
+          expense = totalExpense();
+        if (!income && !expense) {
+          svg.innerHTML = `<text x="50%" y="48%" text-anchor="middle" fill="#68738a" font-size="15">Füge Einnahmen und Ausgaben hinzu</text>`;
+          return;
+        }
+        const padY = 55,
+          usable = h - padY * 2,
+          sourceX = 145,
+          middleX = w * 0.47,
+          targetX = w - 145,
+          nodeW = 16,
+          gap = 18,
+          scale = usable / Math.max(income, expense, 1);
+        const parts = [`<rect width="100%" height="100%" fill="#fff"/>`],
+          frames = new Map();
+        let y = padY;
+        state.incomes.forEach((item) => {
+          const height = Math.max(3, item.value * scale);
+          frames.set("i" + item.id, { x: sourceX, y, h: height });
+          y += height + 6;
+        });
+        y = padY;
+        state.expenses.forEach((item) => {
+          const height = Math.max(3, expenseValue(item) * scale);
+          frames.set("e" + item.id, { x: middleX, y, h: height });
+          y += height + gap;
+        });
+        const children = state.expenses.flatMap((parent) =>
+          parent.children.map((child) => ({ parent, child })),
+        );
+        y = padY;
+        children.forEach(({ parent, child }) => {
+          const height = Math.max(3, child.value * scale);
+          frames.set("c" + child.id, { x: targetX, y, h: height });
+          y += height + 9;
+        });
+        let incomeIndex = 0,
+          sourceOffset = 0,
+          expenseOffsets = new Map();
+        state.expenses.forEach((exp) => {
+          const amount = expenseValue(exp),
+            target = frames.get("e" + exp.id);
+          if (!target || !amount) return;
+          let remaining = amount,
+            cursor = 0;
+          while (remaining > 0 && incomeIndex < state.incomes.length) {
+            const inc = state.incomes[incomeIndex],
+              available = Math.max(0, inc.value - sourceOffset);
+            if (available <= 0) {
+              incomeIndex++;
+              sourceOffset = 0;
+              continue;
+            }
+            const flow = Math.min(remaining, available),
+              source = frames.get("i" + inc.id),
+              lw = Math.max(1, flow * scale),
+              sy = source.y + sourceOffset * scale + lw / 2,
+              ty = target.y + cursor * scale + lw / 2;
+            parts.push(
+              path(sourceX + nodeW, sy, middleX, ty, lw, exp.color, 0.34),
+            );
+            sourceOffset += flow;
+            cursor += flow;
+            remaining -= flow;
+            if (sourceOffset >= inc.value) {
+              incomeIndex++;
+              sourceOffset = 0;
+            }
+          }
+          expenseOffsets.set(exp.id, 0);
+        });
+        state.expenses.forEach((exp) => {
+          const source = frames.get("e" + exp.id);
+          if (!source) return;
+          exp.children.forEach((child) => {
+            const target = frames.get("c" + child.id),
+              lw = Math.max(1, child.value * scale),
+              sy =
+                source.y + (expenseOffsets.get(exp.id) || 0) * scale + lw / 2,
+              ty = target.y + lw / 2;
+            parts.push(
+              path(middleX + nodeW, sy, targetX, ty, lw, exp.color, 0.38),
+            );
+            expenseOffsets.set(
+              exp.id,
+              (expenseOffsets.get(exp.id) || 0) + child.value,
+            );
+          });
+        });
+        state.incomes.forEach((item) =>
+          addNode(
+            parts,
+            frames.get("i" + item.id),
+            item.name,
+            item.value,
+            "left",
+            "#14213d",
+            income,
+            w,
+            nodeW,
+          ),
+        );
+        state.expenses.forEach((item) =>
+          addNode(
+            parts,
+            frames.get("e" + item.id),
+            item.name,
+            expenseValue(item),
+            "middle",
+            item.color,
+            income,
+            w,
+            nodeW,
+          ),
+        );
+        children.forEach(({ parent, child }) =>
+          addNode(
+            parts,
+            frames.get("c" + child.id),
+            child.name,
+            child.value,
+            "right",
+            parent.color,
+            income,
+            w,
+            nodeW,
+          ),
+        );
+        svg.innerHTML = parts.join("");
+      }
+      function path(x1, y1, x2, y2, width, color, opacity) {
+        const d = (x2 - x1) * 0.48;
+        return `<path d="M${x1},${y1} C${x1 + d},${y1} ${x2 - d},${y2} ${x2},${y2}" fill="none" stroke="${color}" stroke-opacity="${opacity}" stroke-width="${width}"/>`;
+      }
+      function addNode(parts, f, name, value, side, color, total, w, nodeW) {
+        if (!f) return;
+        const tx = side === "left" ? f.x - 9 : f.x + nodeW + 9,
+          anchor = side === "left" ? "end" : "start",
+          pct = total ? Math.round((value / total) * 100) : 0;
+        parts.push(
+          `<rect x="${f.x}" y="${f.y}" width="${nodeW}" height="${Math.max(3, f.h)}" rx="3" fill="${color}"/><text class="node-name" x="${tx}" y="${f.y + f.h / 2 - 2}" text-anchor="${anchor}">${clean(name)}</text><text class="node-value" x="${tx}" y="${f.y + f.h / 2 + 12}" text-anchor="${anchor}">${clean(euro(value))} · ${pct}%</text>`,
+        );
+      }
+      async function createPNGBlob() {
+        const svg = document.querySelector("#chart"),
+          width = svg.clientWidth || 1000,
+          height = svg.clientHeight || 650;
+        const clone = svg.cloneNode(true);
+        clone.setAttribute("width", width);
+        clone.setAttribute("height", height);
+        clone.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        const style = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "style",
+        );
+        style.textContent = `text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.node-name{fill:#14213d;font-size:12px;font-weight:700}.node-value{fill:#68738a;font-size:10px;font-weight:600}`;
+        clone.prepend(style);
+        const source = new XMLSerializer().serializeToString(clone);
+        const svgBlob = new Blob([source], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+        const url = URL.createObjectURL(svgBlob),
+          image = new Image();
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = reject;
+          image.src = url;
+        });
+        const scale = 2,
+          canvas = document.createElement("canvas");
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const context = canvas.getContext("2d");
+        context.scale(scale, scale);
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+        return await new Promise((resolve) =>
+          canvas.toBlob(resolve, "image/png"),
+        );
+      }
+      async function downloadPNG() {
+        const blob = await createPNGBlob(),
+          a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "mein-finanzfluss.png";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+      async function sharePNG() {
+        const blob = await createPNGBlob(),
+          file = new File([blob], "mein-finanzfluss.png", {
+            type: "image/png",
+          });
+        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+          try {
+            await navigator.share({
+              title: "Mein Finanzfluss",
+              text: "Mein Sankey-Diagramm",
+              files: [file],
+            });
+          } catch (error) {
+            if (error.name !== "AbortError") await downloadPNG();
+          }
+        } else {
+          await downloadPNG();
+          alert(
+            "Direktes Teilen wird von diesem Browser nicht unterstützt. Die PNG-Datei wurde stattdessen gespeichert.",
+          );
+        }
+      }
+      function downloadProject() {
+        const project = {
+          title: state.title || "Mein Finanzfluss",
+          incomes: state.incomes.map((item) => ({
+            id: crypto.randomUUID(),
+            name: item.name,
+            value: item.value,
+          })),
+          expenses: state.expenses.map((item) => ({
+            id: crypto.randomUUID(),
+            name: item.name,
+            colorHex: item.color,
+            value: item.value,
+            children: item.children.map((child) => ({
+              id: crypto.randomUUID(),
+              name: child.name,
+              value: child.value,
+            })),
+          })),
+        };
+        const blob = new Blob([JSON.stringify(project, null, 2)], {
+            type: "application/json",
+          }),
+          a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "mein-finanzfluss.json";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+      async function loadProject(file) {
+        if (!file) return;
+        try {
+          const project = JSON.parse(await file.text()),
+            loaded =
+              project.format === "flowly-project" ? project.state : project;
+          if (
+            !loaded ||
+            !Array.isArray(loaded.incomes) ||
+            !Array.isArray(loaded.expenses)
+          )
+            throw new Error("Ungültiges Projektformat");
+          state = {
+            title: loaded.title || "Mein Finanzfluss",
+            incomes: loaded.incomes.map((item) => ({
+              id: uid(),
+              name: item.name,
+              value: item.value,
+            })),
+            expenses: loaded.expenses.map((item) => ({
+              id: uid(),
+              name: item.name,
+              color: item.colorHex || item.color || colors[0],
+              value: item.value || 0,
+              children: (item.children || []).map((child) => ({
+                id: uid(),
+                name: child.name,
+                value: child.value,
+              })),
+            })),
+          };
+          render();
+        } catch (error) {
+          alert(
+            "Das Projekt konnte nicht geladen werden. Bitte wähle eine gültige Flowly-Projektdatei aus.",
+          );
+        }
+      }
+      window.addEventListener("resize", draw);
+      resetData();
+    </script>
+  </body>
+</html>
