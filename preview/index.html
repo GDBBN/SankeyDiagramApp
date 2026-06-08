@@ -219,6 +219,11 @@
       .icon-button:hover {
         color: #d33;
       }
+      .icon-button:focus-visible {
+        color: #d33;
+        outline: 3px solid #007aff55;
+        outline-offset: 2px;
+      }
       .add {
         width: 100%;
         border: 1px dashed #bdc8d9;
@@ -308,8 +313,7 @@
         display: none;
       }
       .mobile-tabs,
-      .mobile-title,
-      .toolbar-menu {
+      .mobile-title {
         display: none;
       }
       .toolbar {
@@ -319,46 +323,100 @@
         position: relative;
       }
       .toolbar-button {
-        width: 38px;
-        height: 38px;
+        width: 44px;
+        height: 44px;
         padding: 0;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--blue);
+        display: grid;
+        place-items: center;
+      }
+      .toolbar-button:hover,
+      .toolbar-button:focus-visible {
+        background: var(--blue-soft);
+      }
+      .toolbar-button svg {
+        width: 22px;
+        height: 22px;
+        display: block;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+      .toolbar-button:active,
+      .share-button:active {
+        transform: scale(0.96);
+      }
+      .share-button {
+        height: 44px;
+        min-width: 104px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--blue);
+        color: white;
+        font-weight: 700;
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        justify-content: center;
+      }
+      .share-button:hover,
+      .share-button:focus-visible {
+        background: #2857c6;
+      }
+      .share-button svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.9;
+      }
+      .toolbar-button:focus-visible,
+      .share-button:focus-visible {
+        outline: 3px solid #007aff55;
+        outline-offset: 2px;
+      }
+      .download-control {
+        position: relative;
+      }
+      .download-menu {
+        display: none;
+        position: absolute;
+        z-index: 20;
+        top: calc(100% + 6px);
+        right: 0;
+        width: 210px;
+        padding: 6px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fffffff2;
+        box-shadow: 0 12px 35px #14213d2a;
+        backdrop-filter: blur(18px);
+      }
+      .download-menu.open {
+        display: block;
+      }
+      .download-menu button {
+        width: 100%;
+        min-height: 44px;
+        padding: 0 12px;
         border: 0;
         border-radius: 9px;
         background: transparent;
-        color: var(--blue);
-        font-size: 19px;
-        font-weight: 700;
-      }
-      .toolbar-button:hover {
-        background: var(--blue-soft);
-      }
-      .toolbar-menu {
-        position: absolute;
-        z-index: 20;
-        right: 0;
-        top: 45px;
-        width: 205px;
-        padding: 6px;
-        background: white;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        box-shadow: 0 12px 35px #14213d2a;
-      }
-      .toolbar-menu.open {
-        display: block;
-      }
-      .toolbar-menu button {
-        display: block;
-        width: 100%;
-        padding: 11px;
-        border: 0;
-        background: transparent;
-        text-align: left;
-        border-radius: 8px;
         color: var(--ink);
+        text-align: left;
       }
-      .toolbar-menu button:hover {
+      .download-menu button:hover,
+      .download-menu button:focus-visible {
         background: var(--blue-soft);
+        outline: 0;
       }
       .title-input {
         font-size: 15px;
@@ -409,11 +467,11 @@
         }
         .toolbar {
           margin-left: auto;
-          gap: 0;
+          gap: 1px;
         }
-        .toolbar-button {
-          width: 36px;
-          height: 36px;
+        .share-button {
+          min-width: 92px;
+          padding: 0 12px;
         }
         .app {
           padding: 0;
@@ -451,15 +509,25 @@
           border-radius: 9px;
         }
         .entry {
-          grid-template-columns: 7px 1fr 82px 22px;
+          grid-template-columns: 7px 1fr 82px 44px;
           gap: 5px;
           padding: 7px 4px;
         }
         .category > .entry {
-          grid-template-columns: 28px 1fr 82px 22px;
+          grid-template-columns: 44px 1fr 82px 44px;
         }
         .child-list .entry {
-          grid-template-columns: 1fr 78px 22px;
+          grid-template-columns: 1fr 78px 44px;
+        }
+        input,
+        .icon-button,
+        .color-picker,
+        .add {
+          min-height: 44px;
+        }
+        .color-picker {
+          width: 44px;
+          height: 44px;
         }
         .add {
           background: white;
@@ -525,12 +593,26 @@
           font-weight: 600;
         }
         .mobile-tabs button span {
-          display: block;
-          font-size: 20px;
-          line-height: 24px;
+          display: grid;
+          place-items: center;
+          height: 25px;
+        }
+        .mobile-tabs svg {
+          width: 21px;
+          height: 21px;
+          fill: none;
+          stroke: currentColor;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          stroke-width: 1.8;
         }
         .mobile-tabs button.active {
           color: var(--blue);
+        }
+      }
+      @media (max-width: 370px) {
+        .mobile-title {
+          display: none;
         }
       }
     </style>
@@ -540,49 +622,64 @@
       <div class="brand"><span class="logo">F</span> Sankey Studio</div>
       <div class="mobile-title" id="mobileTitle">Finanzfluss</div>
       <div class="toolbar">
-        <button class="toolbar-button" title="Neu" onclick="newProject()">
-          ＋
+        <button
+          class="toolbar-button"
+          title="Neu"
+          aria-label="Neu"
+          onclick="newProject()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7.5 3.5h6l4 4v13h-10z" />
+            <path d="M13.5 3.5v4h4M9.5 14h6M12.5 11v6" />
+          </svg>
         </button>
         <button
           class="toolbar-button"
           title="Projekt laden"
+          aria-label="Projekt laden"
           onclick="document.querySelector('#projectFile').click()"
         >
-          ⌑
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3.5 7.5h6l2-2h9v14h-17z" />
+            <path d="M12 9.5v6M9.5 13l2.5 2.5 2.5-2.5" />
+          </svg>
         </button>
-        <button
-          class="toolbar-button"
-          title="Exportieren"
-          onclick="toggleExportMenu()"
-        >
-          ↥
-        </button>
-        <div class="toolbar-menu" id="exportMenu">
+        <div class="download-control">
           <button
-            onclick="
-              downloadProject();
-              toggleExportMenu();
-            "
+            class="toolbar-button"
+            id="downloadButton"
+            title="Herunterladen"
+            aria-label="Herunterladen"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            onclick="toggleDownloadMenu()"
           >
-            Projekt speichern
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3.5v11M8.5 11l3.5 3.5 3.5-3.5" />
+              <path d="M5 16.5v4h14v-4" />
+            </svg>
           </button>
-          <button
-            onclick="
-              downloadPNG();
-              toggleExportMenu();
-            "
-          >
-            PNG speichern
-          </button>
-          <button
-            onclick="
-              sharePNG();
-              toggleExportMenu();
-            "
-          >
-            PNG teilen
-          </button>
+          <div class="download-menu" id="downloadMenu" role="menu">
+            <button role="menuitem" onclick="downloadProject(); closeDownloadMenu()">
+              Als JSON herunterladen
+            </button>
+            <button role="menuitem" onclick="downloadPNG(); closeDownloadMenu()">
+              Als PNG herunterladen
+            </button>
+          </div>
         </div>
+        <button
+          class="share-button"
+          title="PNG teilen"
+          aria-label="PNG teilen"
+          onclick="sharePNG()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 15.5v-12M8.5 7 12 3.5 15.5 7" />
+            <path d="M6 11v9.5h12V11" />
+          </svg>
+          Teilen
+        </button>
         <input
           id="projectFile"
           type="file"
@@ -603,6 +700,7 @@
             <input
               class="title-input"
               id="projectTitle"
+              aria-label="Diagrammtitel"
               value="Monatlicher Finanzfluss"
               oninput="updateTitle(this.value)"
             />
@@ -657,10 +755,23 @@
     </div>
     <nav class="mobile-tabs">
       <button id="editorTab" class="active" onclick="setTab('editor')">
-        <span>☷</span>Bearbeiten
+        <span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h7M15 18h5" />
+            <circle cx="16" cy="6" r="2" />
+            <circle cx="8" cy="12" r="2" />
+            <circle cx="13" cy="18" r="2" />
+          </svg>
+        </span>
+        Bearbeiten
       </button>
       <button id="previewTab" onclick="setTab('preview')">
-        <span>▥</span>Vorschau
+        <span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 18V9M10 18V5M16 18v-6M22 18V7" />
+          </svg>
+        </span>
+        Vorschau
       </button>
     </nav>
 
@@ -712,47 +823,9 @@
 
       function resetData() {
         state = {
-          title: "Monatlicher Finanzfluss",
-          incomes: [
-            { id: uid(), name: "Gehalt", value: 3200 },
-            { id: uid(), name: "Nebenjob", value: 400 },
-          ],
-          expenses: [
-            {
-              id: uid(),
-              name: "Wohnen",
-              color: colors[0],
-              value: 0,
-              children: [
-                { id: uid(), name: "Miete", value: 1050 },
-                { id: uid(), name: "Strom & Internet", value: 120 },
-              ],
-            },
-            {
-              id: uid(),
-              name: "Alltag",
-              color: colors[1],
-              value: 0,
-              children: [
-                { id: uid(), name: "Lebensmittel", value: 430 },
-                { id: uid(), name: "Freizeit", value: 260 },
-              ],
-            },
-            {
-              id: uid(),
-              name: "Mobilität",
-              color: colors[3],
-              value: 310,
-              children: [],
-            },
-            {
-              id: uid(),
-              name: "Sparen & Investieren",
-              color: colors[4],
-              value: 900,
-              children: [],
-            },
-          ],
+          title: "Mein Finanzfluss",
+          incomes: [],
+          expenses: [],
         };
         render();
       }
@@ -790,8 +863,18 @@
           : "Finanzfluss";
         if (preview) setTimeout(draw, 0);
       }
-      function toggleExportMenu() {
-        document.querySelector("#exportMenu").classList.toggle("open");
+      function toggleDownloadMenu() {
+        const menu = document.querySelector("#downloadMenu"),
+          button = document.querySelector("#downloadButton"),
+          isOpen = menu.classList.toggle("open");
+        button.setAttribute("aria-expanded", isOpen);
+        if (isOpen) menu.querySelector("button").focus();
+      }
+      function closeDownloadMenu() {
+        document.querySelector("#downloadMenu").classList.remove("open");
+        document
+          .querySelector("#downloadButton")
+          .setAttribute("aria-expanded", "false");
       }
       function addIncome() {
         state.incomes.push({ id: uid(), name: "Neue Einnahme", value: 0 });
@@ -852,26 +935,26 @@
             .map(
               (x) => `
           <div class="entry"><span class="dot" style="background:#14213d"></span>
-            <input value="${clean(x.name)}" oninput="updateIncome(${x.id},'name',this.value)">
-            <input class="money" type="number" min="0" value="${x.value}" oninput="updateIncome(${x.id},'value',this.value)">
-            <button class="icon-button" onclick="removeIncome(${x.id})">×</button>
+            <input aria-label="Name der Einnahme" value="${clean(x.name)}" oninput="updateIncome(${x.id},'name',this.value)">
+            <input aria-label="Betrag der Einnahme" class="money" type="number" min="0" value="${x.value}" oninput="updateIncome(${x.id},'value',this.value)">
+            <button class="icon-button" aria-label="Einnahme löschen" onclick="removeIncome(${x.id})">×</button>
           </div>`,
             )
             .join("");
           document.querySelector("#expenseList").innerHTML = state.expenses
             .map(
               (x) => `
-          <div class="category"><div class="entry"><input class="color-picker" type="color" value="${x.color}" oninput="updateExpense(${x.id},'color',this.value)">
-            <input value="${clean(x.name)}" oninput="updateExpense(${x.id},'name',this.value)">
-            <input class="money" type="number" min="0" value="${x.children.length ? expenseValue(x) : x.value}" ${x.children.length ? "disabled" : ""} oninput="updateExpense(${x.id},'value',this.value)">
-            <button class="icon-button" onclick="removeExpense(${x.id})">×</button>
+          <div class="category"><div class="entry"><input aria-label="Farbe der Ausgabengruppe" class="color-picker" type="color" value="${x.color}" oninput="updateExpense(${x.id},'color',this.value)">
+            <input aria-label="Name der Ausgabengruppe" value="${clean(x.name)}" oninput="updateExpense(${x.id},'name',this.value)">
+            <input aria-label="Betrag der Ausgabengruppe" class="money" type="number" min="0" value="${x.children.length ? expenseValue(x) : x.value}" ${x.children.length ? "disabled" : ""} oninput="updateExpense(${x.id},'value',this.value)">
+            <button class="icon-button" aria-label="Ausgabengruppe löschen" onclick="removeExpense(${x.id})">×</button>
           </div>
           <div class="child-list">${x.children
             .map(
               (c) => `<div class="entry">
-            <input value="${clean(c.name)}" oninput="updateChild(${x.id},${c.id},'name',this.value)">
-            <input class="money" type="number" min="0" value="${c.value}" oninput="updateChild(${x.id},${c.id},'value',this.value)">
-            <button class="icon-button" onclick="removeChild(${x.id},${c.id})">×</button></div>`,
+            <input aria-label="Name der Unterkategorie" value="${clean(c.name)}" oninput="updateChild(${x.id},${c.id},'name',this.value)">
+            <input aria-label="Betrag der Unterkategorie" class="money" type="number" min="0" value="${c.value}" oninput="updateChild(${x.id},${c.id},'value',this.value)">
+            <button class="icon-button" aria-label="Unterkategorie löschen" onclick="removeChild(${x.id},${c.id})">×</button></div>`,
             )
             .join("")}</div>
           <button class="add child" onclick="addChild(${x.id})">+ Unterkategorie</button></div>`,
@@ -1186,6 +1269,15 @@
           );
         }
       }
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest(".download-control")) closeDownloadMenu();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeDownloadMenu();
+          document.querySelector("#downloadButton").focus();
+        }
+      });
       window.addEventListener("resize", draw);
       resetData();
     </script>
